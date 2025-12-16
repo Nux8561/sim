@@ -557,6 +557,14 @@ export class WorkflowDiffEngine {
         const existingBlock = existingBlockMap[key]?.block
 
         // Merge with existing block if found, otherwise use proposed
+        // Deep merge subBlocks to preserve runtime values (webhookId, triggerPath, etc.)
+        const mergedSubBlocks = existingBlock
+          ? {
+              ...existingBlock.subBlocks,
+              ...proposedBlock.subBlocks,
+            }
+          : proposedBlock.subBlocks
+
         const finalBlock: BlockState & BlockWithDiff = existingBlock
           ? {
               ...existingBlock,
@@ -564,6 +572,8 @@ export class WorkflowDiffEngine {
               id: finalId,
               // Preserve position from proposed or fallback to existing
               position: proposedBlock.position || existingBlock.position,
+              // Use deep-merged subBlocks to preserve runtime values
+              subBlocks: mergedSubBlocks,
             }
           : {
               ...proposedBlock,
