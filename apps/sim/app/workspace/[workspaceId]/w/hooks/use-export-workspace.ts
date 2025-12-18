@@ -1,9 +1,6 @@
 import { useCallback, useState } from 'react'
 import { createLogger } from '@/lib/logs/console/logger'
-import {
-  exportWorkspaceToZip,
-  type WorkflowExportData,
-} from '@/lib/workflows/operations/import-export'
+import { exportWorkspaceToZip } from '@/lib/workflows/operations/import-export'
 
 const logger = createLogger('useExportWorkspace')
 
@@ -18,8 +15,7 @@ interface UseExportWorkspaceProps {
  * Hook for managing workspace export to ZIP.
  *
  * Handles:
- * - Fetching all workflows and folders from workspace
- * - Fetching workflow states and variables
+ * - Fetching all workflows and folders from workspace via bulk export endpoint
  * - Creating ZIP file with all workspace data
  * - Downloading the ZIP file
  * - Loading state management
@@ -42,74 +38,13 @@ export function useExportWorkspace({ onSuccess }: UseExportWorkspaceProps = {}) 
       try {
         logger.info('Exporting workspace', { workspaceId })
 
-        // Fetch all workflows in workspace
-        const workflowsResponse = await fetch(`/api/workflows?workspaceId=${workspaceId}`)
-        if (!workflowsResponse.ok) {
-          throw new Error('Failed to fetch workflows')
-        }
-        const { data: workflows } = await workflowsResponse.json()
-
-        // Fetch all folders in workspace
-        const foldersResponse = await fetch(`/api/folders?workspaceId=${workspaceId}`)
-        if (!foldersResponse.ok) {
-          throw new Error('Failed to fetch folders')
-        }
-        const foldersData = await foldersResponse.json()
-
-        // Export each workflow
-        const workflowsToExport: WorkflowExportData[] = []
-
-        for (const workflow of workflows) {
-          try {
-            const workflowResponse = await fetch(`/api/workflows/${workflow.id}`)
-            if (!workflowResponse.ok) {
-              logger.warn(`Failed to fetch workflow ${workflow.id}`)
-              continue
-            }
-
-            const { data: workflowData } = await workflowResponse.json()
-            if (!workflowData?.state) {
-              logger.warn(`Workflow ${workflow.id} has no state`)
-              continue
-            }
-
-            const variablesResponse = await fetch(`/api/workflows/${workflow.id}/variables`)
-            let workflowVariables: any[] = []
-            if (variablesResponse.ok) {
-              const variablesData = await variablesResponse.json()
-              workflowVariables = Object.values(variablesData?.data || {}).map((v: any) => ({
-                id: v.id,
-                name: v.name,
-                type: v.type,
-                value: v.value,
-              }))
-            }
-
-            workflowsToExport.push({
-              workflow: {
-                id: workflow.id,
-                name: workflow.name,
-                description: workflow.description,
-                color: workflow.color,
-                folderId: workflow.folderId,
-              },
-              state: workflowData.state,
-              variables: workflowVariables,
-            })
-          } catch (error) {
-            logger.error(`Failed to export workflow ${workflow.id}:`, error)
-          }
+        // Single API call to get all workspace data (workflows with states + folders)
+        const response = await fetch(`/api/workspaces/${workspaceId}/export`)
+        if (!response.ok) {
+          throw new Error('Failed to export workspace')
         }
 
-        const foldersToExport: Array<{
-          id: string
-          name: string
-          parentId: string | null
-        }> = (foldersData.folders || []).map((folder: any) => ({
-          id: folder.id,
-          name: folder.name,
-          parentId: folder.parentId,
-        }))
+        const { workflows: workflowsToExport, folders: foldersToExport } = await response.json()
 
         const zipBlob = await exportWorkspaceToZip(
           workspaceName,

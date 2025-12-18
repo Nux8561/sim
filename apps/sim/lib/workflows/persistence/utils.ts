@@ -9,7 +9,7 @@ import {
   workflowSubflows,
 } from '@sim/db'
 import type { InferSelectModel } from 'drizzle-orm'
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import type { Edge } from 'reactflow'
 import { v4 as uuidv4 } from 'uuid'
 import { createLogger } from '@/lib/logs/console/logger'
@@ -599,6 +599,178 @@ export async function deployWorkflow(params: {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
     }
+  }
+}
+
+/**
+ * Bulk load workflow states for multiple workflows in a single set of queries.
+ * Much more efficient than calling loadWorkflowFromNormalizedTables for each workflow.
+ */
+export async function loadBulkWorkflowsFromNormalizedTables(
+  workflowIds: string[]
+): Promise<Map<string, NormalizedWorkflowData>> {
+  const result = new Map<string, NormalizedWorkflowData>()
+
+  if (workflowIds.length === 0) {
+    return result
+  }
+
+  try {
+    // Load all components for all workflows in parallel (just 3 queries total)
+    const [allBlocks, allEdges, allSubflows] = await Promise.all([
+      db.select().from(workflowBlocks).where(inArray(workflowBlocks.workflowId, workflowIds)),
+      db.select().from(workflowEdges).where(inArray(workflowEdges.workflowId, workflowIds)),
+      db.select().from(workflowSubflows).where(inArray(workflowSubflows.workflowId, workflowIds)),
+    ])
+
+    // Group blocks by workflow
+    const blocksByWorkflow = new Map<string, typeof allBlocks>()
+    for (const block of allBlocks) {
+      const existing = blocksByWorkflow.get(block.workflowId) || []
+      existing.push(block)
+      blocksByWorkflow.set(block.workflowId, existing)
+    }
+
+    // Group edges by workflow
+    const edgesByWorkflow = new Map<string, typeof allEdges>()
+    for (const edge of allEdges) {
+      const existing = edgesByWorkflow.get(edge.workflowId) || []
+      existing.push(edge)
+      edgesByWorkflow.set(edge.workflowId, existing)
+    }
+
+    // Group subflows by workflow
+    const subflowsByWorkflow = new Map<string, typeof allSubflows>()
+    for (const subflow of allSubflows) {
+      const existing = subflowsByWorkflow.get(subflow.workflowId) || []
+      existing.push(subflow)
+      subflowsByWorkflow.set(subflow.workflowId, existing)
+    }
+
+    // Process each workflow
+    for (const workflowId of workflowIds) {
+      const blocks = blocksByWorkflow.get(workflowId) || []
+      const edges = edgesByWorkflow.get(workflowId) || []
+      const subflows = subflowsByWorkflow.get(workflowId) || []
+
+      // Skip workflows with no blocks (not migrated yet)
+      if (blocks.length === 0) {
+        continue
+      }
+
+      // Convert blocks to the expected format
+      const blocksMap: Record<string, BlockState> = {}
+      blocks.forEach((block) => {
+        const blockData = block.data || {}
+
+        const assembled: BlockState = {
+          id: block.id,
+          type: block.type,
+          name: block.name,
+          position: {
+            x: Number(block.positionX),
+            y: Number(block.positionY),
+          },
+          enabled: block.enabled,
+          horizontalHandles: block.horizontalHandles,
+          advancedMode: block.advancedMode,
+          triggerMode: block.triggerMode,
+          height: Number(block.height),
+          subBlocks: (block.subBlocks as BlockState['subBlocks']) || {},
+          outputs: (block.outputs as BlockState['outputs']) || {},
+          data: blockData,
+        }
+
+        blocksMap[block.id] = assembled
+      })
+
+      // Sanitize any invalid custom tools in agent blocks
+      const { blocks: sanitizedBlocks } = sanitizeAgentToolsInBlocks(blocksMap)
+
+      // Migrate old agent block format to new messages array format
+      const migratedBlocks = migrateAgentBlocksToMessagesFormat(sanitizedBlocks)
+
+      // Convert edges to the expected format
+      const edgesArray: Edge[] = edges.map((edge) => ({
+        id: edge.id,
+        source: edge.sourceBlockId,
+        target: edge.targetBlockId,
+        sourceHandle: edge.sourceHandle ?? undefined,
+        targetHandle: edge.targetHandle ?? undefined,
+        type: 'default',
+        data: {},
+      }))
+
+      // Convert subflows to loops and parallels
+      const loops: Record<string, Loop> = {}
+      const parallels: Record<string, Parallel> = {}
+
+      subflows.forEach((subflow) => {
+        const config = (subflow.config ?? {}) as Partial<Loop & Parallel>
+
+        if (subflow.type === SUBFLOW_TYPES.LOOP) {
+          const loopType =
+            (config as Loop).loopType === 'for' ||
+            (config as Loop).loopType === 'forEach' ||
+            (config as Loop).loopType === 'while' ||
+            (config as Loop).loopType === 'doWhile'
+              ? (config as Loop).loopType
+              : 'for'
+
+          const loop: Loop = {
+            id: subflow.id,
+            nodes: Array.isArray((config as Loop).nodes) ? (config as Loop).nodes : [],
+            iterations:
+              typeof (config as Loop).iterations === 'number' ? (config as Loop).iterations : 1,
+            loopType,
+            forEachItems: (config as Loop).forEachItems ?? '',
+            whileCondition: (config as Loop).whileCondition ?? '',
+            doWhileCondition: (config as Loop).doWhileCondition ?? '',
+          }
+          loops[subflow.id] = loop
+
+          // Sync block.data with loop config
+          if (migratedBlocks[subflow.id]) {
+            const block = migratedBlocks[subflow.id]
+            migratedBlocks[subflow.id] = {
+              ...block,
+              data: {
+                ...block.data,
+                collection: loop.forEachItems ?? block.data?.collection ?? '',
+                whileCondition: loop.whileCondition ?? block.data?.whileCondition ?? '',
+                doWhileCondition: loop.doWhileCondition ?? block.data?.doWhileCondition ?? '',
+              },
+            }
+          }
+        } else if (subflow.type === SUBFLOW_TYPES.PARALLEL) {
+          const parallel: Parallel = {
+            id: subflow.id,
+            nodes: Array.isArray((config as Parallel).nodes) ? (config as Parallel).nodes : [],
+            count: typeof (config as Parallel).count === 'number' ? (config as Parallel).count : 5,
+            distribution: (config as Parallel).distribution ?? '',
+            parallelType:
+              (config as Parallel).parallelType === 'count' ||
+              (config as Parallel).parallelType === 'collection'
+                ? (config as Parallel).parallelType
+                : 'count',
+          }
+          parallels[subflow.id] = parallel
+        }
+      })
+
+      result.set(workflowId, {
+        blocks: migratedBlocks,
+        edges: edgesArray,
+        loops,
+        parallels,
+        isFromNormalizedTables: true,
+      })
+    }
+
+    return result
+  } catch (error) {
+    logger.error('Error bulk loading workflows from normalized tables:', error)
+    return result
   }
 }
 
