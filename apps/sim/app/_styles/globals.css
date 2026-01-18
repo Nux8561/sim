@@ -47,8 +47,8 @@
  * Uses brand-secondary color for selection highlighting
  */
 .react-flow__selection {
-  background: rgba(51, 180, 255, 0.08) !important;
-  border: 1px solid var(--brand-secondary) !important;
+  background: rgba(37, 99, 235, 0.08) !important; /* Blau-basiert */
+  border: 1px solid var(--brand-400) !important;
 }
 
 .react-flow__nodesselection-rect,
@@ -113,9 +113,9 @@
     --border-muted: #e4e4e4;
     --border-success: #e0e0e0;
 
-    /* Brand & state */
-    --brand-400: #8e4cfb;
-    --brand-secondary: #33b4ff;
+    /* Brand & state - Professionelles Blau-Grau Theme */
+    --brand-400: #2563eb; /* Primäres Blau */
+    --brand-secondary: #64748b; /* Grau-Akzent */
     --brand-tertiary: #22c55e;
     --brand-tertiary-2: #32bd7e;
     --warning: #ea580c;
@@ -230,9 +230,9 @@
     --border-muted: #424242;
     --border-success: #575757;
 
-    /* Brand & state */
-    --brand-400: #8e4cfb;
-    --brand-secondary: #33b4ff;
+    /* Brand & state - Professionelles Blau-Grau Theme */
+    --brand-400: #2563eb; /* Primäres Blau */
+    --brand-secondary: #64748b; /* Grau-Akzent */
     --brand-tertiary: #22c55e;
     --brand-tertiary-2: #32bd7e;
     --warning: #ff6600;

@@ -9,8 +9,8 @@ export function generateBrandedMetadata(override: Partial<Metadata> = {}): Metad
   const brand = getBrandConfig()
 
   const defaultTitle = brand.name
-  const summaryFull = `Sim is an open-source AI agent workflow builder. Developers at trail-blazing startups to Fortune 500 companies deploy agentic workflows on the Sim platform. 60,000+ developers already use Sim to build and deploy AI agent workflows and connect them to 100+ apps. Sim is SOC2 and HIPAA compliant, ensuring enterprise-grade security for AI automation.`
-  const summaryShort = `Sim is an open-source AI agent workflow builder for production workflows.`
+  const summaryFull = `introFlow ist ein visueller AI-Workflow-Builder für die Erstellung und Verwaltung von AI-Agent-Workflows. Entwickle und deploye AI-Workflows mit einer intuitiven visuellen Oberfläche.`
+  const summaryShort = `introFlow - Visueller AI-Workflow-Builder für moderne Workflows.`
 
   return {
     title: {
@@ -79,8 +79,8 @@ export function generateBrandedMetadata(override: Partial<Metadata> = {}): Metad
       title: defaultTitle,
       description: summaryFull,
       images: [brand.logoUrl || '/logo/426-240/primary/small.png'],
-      creator: '@simdotai',
-      site: '@simdotai',
+      creator: '@introflow',
+      site: '@introflow',
     },
     manifest: '/manifest.webmanifest',
     icons: {
@@ -97,7 +97,7 @@ export function generateBrandedMetadata(override: Partial<Metadata> = {}): Metad
           sizes: '512x512',
           type: 'image/png',
         },
-        { url: brand.faviconUrl || '/sim.png', sizes: 'any', type: 'image/png' },
+        { url: brand.faviconUrl || '/introflow.png', sizes: 'any', type: 'image/png' },
       ],
       apple: '/favicon/apple-touch-icon.png',
       shortcut: brand.faviconUrl || '/favicon/favicon.ico',
@@ -114,7 +114,7 @@ export function generateBrandedMetadata(override: Partial<Metadata> = {}): Metad
     other: {
       'apple-mobile-web-app-capable': 'yes',
       'mobile-web-app-capable': 'yes',
-      'msapplication-TileColor': '#701FFC', // Default Sim brand primary color
+      'msapplication-TileColor': '#2563eb', // Default introFlow brand primary color
       'msapplication-config': '/favicon/browserconfig.xml',
     },
     ...override,
@@ -128,23 +128,23 @@ export function generateStructuredData() {
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'Sim',
+    name: 'introFlow',
     description:
-      'Sim is an open-source AI agent workflow builder. Developers at trail-blazing startups to Fortune 500 companies deploy agentic workflows on the Sim platform. 60,000+ developers already use Sim to build and deploy AI agent workflows and connect them to 100+ apps. Sim is SOC2 and HIPAA compliant, ensuring enterprise-level security.',
+      'introFlow ist ein visueller AI-Workflow-Builder für die Erstellung und Verwaltung von AI-Agent-Workflows. Entwickle und deploye AI-Workflows mit einer intuitiven visuellen Oberfläche.',
     url: getBaseUrl(),
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web Browser',
     applicationSubCategory: 'AIWorkflowAutomation',
     areaServed: 'Worldwide',
-    availableLanguage: ['en'],
+    availableLanguage: ['de', 'en'],
     offers: {
       '@type': 'Offer',
       category: 'SaaS',
     },
     creator: {
       '@type': 'Organization',
-      name: 'Sim',
-      url: 'https://sim.ai',
+      name: 'introFlow',
+      url: 'https://introflow.ai',
     },
     featureList: [
       'Visual AI Agent Builder',

@@ -24,19 +24,19 @@ export interface BrandConfig {
  * Default brand configuration values
  */
 const defaultConfig: BrandConfig = {
-  name: 'Sim',
+  name: 'introFlow',
   logoUrl: undefined,
   faviconUrl: '/favicon/favicon.ico',
   customCssUrl: undefined,
-  supportEmail: 'help@sim.ai',
+  supportEmail: 'help@introflow.ai',
   documentationUrl: undefined,
   termsUrl: undefined,
   privacyUrl: undefined,
   theme: {
-    primaryColor: '#701ffc',
-    primaryHoverColor: '#802fff',
-    accentColor: '#9d54ff',
-    accentHoverColor: '#a66fff',
+    primaryColor: '#2563eb', // Professionelles Blau
+    primaryHoverColor: '#1d4ed8',
+    accentColor: '#64748b', // Grau-Akzent
+    accentHoverColor: '#475569',
     backgroundColor: '#0c0c0c',
   },
 }
