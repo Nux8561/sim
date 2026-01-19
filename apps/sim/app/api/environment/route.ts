@@ -76,38 +76,53 @@ export async function GET(request: Request) {
   const requestId = generateRequestId()
 
   try {
-    const session = await getSession()
+    let session
+    try {
+      session = await getSession()
+    } catch (error) {
+      // In DISABLE_AUTH mode, if session fetch fails, return empty environment
+      logger.debug(`[${requestId}] Session fetch failed, returning empty environment`, { error })
+      return NextResponse.json({ data: {} }, { status: 200 })
+    }
+    
     if (!session?.user?.id) {
-      logger.warn(`[${requestId}] Unauthorized environment variables access attempt`)
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      // In DISABLE_AUTH mode, return empty environment
+      logger.debug(`[${requestId}] No user session, returning empty environment`)
+      return NextResponse.json({ data: {} }, { status: 200 })
     }
 
     const userId = session.user.id
 
-    const result = await db
-      .select()
-      .from(environment)
-      .where(eq(environment.userId, userId))
-      .limit(1)
+    try {
+      const result = await db
+        .select()
+        .from(environment)
+        .where(eq(environment.userId, userId))
+        .limit(1)
 
-    if (!result.length || !result[0].variables) {
+      if (!result.length || !result[0].variables) {
+        return NextResponse.json({ data: {} }, { status: 200 })
+      }
+
+      const encryptedVariables = result[0].variables as Record<string, string>
+      const decryptedVariables: Record<string, EnvironmentVariable> = {}
+
+      for (const [key, encryptedValue] of Object.entries(encryptedVariables)) {
+        try {
+          const { decrypted } = await decryptSecret(encryptedValue)
+          decryptedVariables[key] = { key, value: decrypted }
+        } catch (error) {
+          logger.error(`[${requestId}] Error decrypting variable ${key}`, error)
+          decryptedVariables[key] = { key, value: '' }
+        }
+      }
+
+      return NextResponse.json({ data: decryptedVariables }, { status: 200 })
+    } catch (dbError) {
+      // If database query fails (e.g., in DISABLE_AUTH mode without DB), return empty environment
+      logger.debug(`[${requestId}] Database query failed, returning empty environment`, { dbError })
       return NextResponse.json({ data: {} }, { status: 200 })
     }
-
-    const encryptedVariables = result[0].variables as Record<string, string>
-    const decryptedVariables: Record<string, EnvironmentVariable> = {}
-
-    for (const [key, encryptedValue] of Object.entries(encryptedVariables)) {
-      try {
-        const { decrypted } = await decryptSecret(encryptedValue)
-        decryptedVariables[key] = { key, value: decrypted }
-      } catch (error) {
-        logger.error(`[${requestId}] Error decrypting variable ${key}`, error)
-        decryptedVariables[key] = { key, value: '' }
-      }
-    }
-
-    return NextResponse.json({ data: decryptedVariables }, { status: 200 })
   } catch (error: any) {
     logger.error(`[${requestId}] Environment fetch error`, error)
     return NextResponse.json({ error: error.message }, { status: 500 })

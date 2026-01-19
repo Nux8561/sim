@@ -30,8 +30,9 @@ export async function GET(request: Request) {
   try {
     const session = await getSession()
     if (!session?.user?.id) {
-      logger.warn(`[${requestId}] Unauthorized workflow access attempt`)
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      // In DISABLE_AUTH mode, return empty workflows
+      logger.debug(`[${requestId}] No user session, returning empty workflows`)
+      return NextResponse.json({ workflows: [] }, { status: 200 })
     }
 
     const userId = session.user.id

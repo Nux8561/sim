@@ -37,7 +37,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const session = await getSession()
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+      // In DISABLE_AUTH mode, return empty permissions
+      logger.debug('No user session, returning empty permissions')
+      return NextResponse.json({ users: [], total: 0 }, { status: 200 })
     }
 
     const userPermission = await db

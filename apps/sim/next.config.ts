@@ -85,7 +85,21 @@ const nextConfig: NextConfig = {
     'thread-stream',
     'ws',
     'isolated-vm',
+    'dns',
   ],
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Exclude Node.js modules from client bundle
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        dns: false,
+        net: false,
+        tls: false,
+        fs: false,
+      }
+    }
+    return config
+  },
   outputFileTracingIncludes: {
     '/api/tools/stagehand/*': ['./node_modules/ws/**/*'],
     '/*': ['./node_modules/sharp/**/*', './node_modules/@img/**/*'],

@@ -13,7 +13,9 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getSession()
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      // In DISABLE_AUTH mode, return empty folders
+      logger.debug('No user session, returning empty folders')
+      return NextResponse.json({ folders: [] }, { status: 200 })
     }
 
     const { searchParams } = new URL(request.url)

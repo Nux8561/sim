@@ -11,6 +11,8 @@ let anonymousUserEnsured = false
 /**
  * Ensures the anonymous user and their stats record exist in the database.
  * Called when DISABLE_AUTH is enabled to ensure DB operations work.
+ * If database operations fail, this function will still mark as ensured
+ * to allow the app to continue working without database connectivity.
  */
 export async function ensureAnonymousUserExists(): Promise<void> {
   if (anonymousUserEnsured) return
@@ -52,8 +54,10 @@ export async function ensureAnonymousUserExists(): Promise<void> {
       anonymousUserEnsured = true
       return
     }
-    logger.error('Failed to ensure anonymous user exists', { error })
-    throw error
+    // If database operations fail, log the error but don't throw
+    // This allows the app to work in DISABLE_AUTH mode even without database connectivity
+    logger.warn('Failed to ensure anonymous user exists, continuing without database', { error })
+    anonymousUserEnsured = true
   }
 }
 

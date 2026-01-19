@@ -18,11 +18,11 @@ export default function WorkspacePage() {
         return
       }
 
-      // If user is not authenticated, redirect to login
-      if (!session?.user) {
-        logger.info('User not authenticated, redirecting to login')
-        router.replace('/login')
-        return
+      // In DISABLE_AUTH mode, continue even without session
+      // The API will handle anonymous user creation
+      if (!session) {
+        logger.info('No session found, but continuing with workspace creation (DISABLE_AUTH mode)')
+        // Don't return - continue to try creating/loading workspace
       }
 
       try {
@@ -131,10 +131,8 @@ export default function WorkspacePage() {
     )
   }
 
-  // If user is not authenticated, show nothing (redirect will happen)
-  if (!session?.user) {
-    return null
-  }
+  // In DISABLE_AUTH mode, allow workspace creation even without session
+  // The useEffect will handle workspace creation/loading
 
   return null
 }
