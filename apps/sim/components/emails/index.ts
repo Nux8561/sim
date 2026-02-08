@@ -12,8 +12,12 @@ export * from './components'
 export * from './invitations'
 // Notification emails
 export * from './notifications'
+// Onboarding emails (new)
+export * from './onboarding'
 // Render functions and subjects
 export * from './render'
+// Sales/CRM emails (new)
+export * from './sales'
 export * from './subjects'
 // Support emails
 export * from './support'

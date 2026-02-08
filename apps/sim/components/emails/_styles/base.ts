@@ -3,62 +3,70 @@
  * Colors are derived from globals.css light mode tokens.
  */
 
-/** Color tokens from globals.css (light mode) */
+/** Color tokens from globals.css (light mode) - Attio-inspired */
 export const colors = {
-  /** Main canvas background */
-  bgOuter: '#F7F9FC',
+  /** Main canvas background - clean white */
+  bgOuter: '#ffffff',
   /** Card/container background - pure white */
   bgCard: '#ffffff',
-  /** Primary text color */
-  textPrimary: '#2d2d2d',
-  /** Secondary text color */
-  textSecondary: '#404040',
+  /** Primary text color - softer black */
+  textPrimary: '#1a1a1a',
+  /** Secondary text color - warm gray */
+  textSecondary: '#374151',
   /** Tertiary text color */
-  textTertiary: '#5c5c5c',
+  textTertiary: '#6b7280',
   /** Muted text (footer) */
-  textMuted: '#737373',
-  /** Brand primary - purple */
-  brandPrimary: '#6f3dfa',
-  /** Brand tertiary - green (matches Run/Deploy buttons) */
-  brandTertiary: '#32bd7e',
-  /** Border/divider color */
-  divider: '#ededed',
-  /** Footer background */
-  footerBg: '#F7F9FC',
+  textMuted: '#9ca3af',
+  /** Brand primary - introFlow blue */
+  brandPrimary: '#2563eb',
+  /** Brand button - Attio-style dark */
+  brandButton: '#1a1a1a',
+  /** Brand tertiary - kept for backwards compatibility */
+  brandTertiary: '#1a1a1a',
+  /** Link color - golden accent like Attio */
+  linkColor: '#d97706',
+  /** Border/divider color - very subtle */
+  divider: '#f3f4f6',
+  /** Footer background - light gray */
+  footerBg: '#f9fafb',
 }
 
-/** Typography settings */
+/** Typography settings - Attio-inspired */
 export const typography = {
-  fontFamily: "-apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica', sans-serif",
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif",
   fontSize: {
     body: '16px',
     small: '14px',
-    caption: '12px',
+    caption: '13px',
+    heading: '20px',
   },
   lineHeight: {
-    body: '24px',
+    body: '26px',
     caption: '20px',
+    heading: '28px',
   },
 }
 
-/** Spacing values */
+/** Spacing values - More whitespace like Attio */
 export const spacing = {
-  containerWidth: 600,
-  gutter: 40,
-  sectionGap: 20,
-  paragraphGap: 12,
+  containerWidth: 580,
+  gutter: 48,
+  sectionGap: 32,
+  paragraphGap: 20,
   /** Logo width in pixels */
-  logoWidth: 90,
+  logoWidth: 100,
+  /** Hero image margin */
+  heroMargin: 32,
 }
 
 export const baseStyles = {
   fontFamily: typography.fontFamily,
 
-  /** Main body wrapper with outer background */
+  /** Main body wrapper with outer background - Attio-style clean white */
   main: {
     backgroundColor: colors.bgOuter,
     fontFamily: typography.fontFamily,
-    padding: '32px 0',
+    padding: '48px 0',
   },
 
   /** Center wrapper for email content */
@@ -67,107 +75,107 @@ export const baseStyles = {
     margin: '0 auto',
   },
 
-  /** Main card container with rounded corners */
+  /** Main card container - Attio-style minimal, no visible border */
   container: {
     maxWidth: `${spacing.containerWidth}px`,
     margin: '0 auto',
     backgroundColor: colors.bgCard,
-    borderRadius: '16px',
+    borderRadius: '0',
     overflow: 'hidden',
   },
 
-  /** Header section with logo */
+  /** Header section with logo - More padding like Attio */
   header: {
-    padding: `32px ${spacing.gutter}px 16px ${spacing.gutter}px`,
-    textAlign: 'left' as const,
+    padding: `40px ${spacing.gutter}px 24px ${spacing.gutter}px`,
+    textAlign: 'center' as const,
   },
 
-  /** Main content area with horizontal padding */
+  /** Main content area with horizontal padding - More spacious */
   content: {
-    padding: `0 ${spacing.gutter}px 32px ${spacing.gutter}px`,
+    padding: `0 ${spacing.gutter}px 48px ${spacing.gutter}px`,
   },
 
-  /** Standard paragraph text */
+  /** Standard paragraph text - Warmer, more readable */
   paragraph: {
     fontSize: typography.fontSize.body,
     lineHeight: typography.lineHeight.body,
     color: colors.textSecondary,
     fontWeight: 400,
     fontFamily: typography.fontFamily,
-    margin: `${spacing.paragraphGap}px 0`,
+    margin: `0 0 ${spacing.paragraphGap}px 0`,
   },
 
   /** Bold label text (e.g., "Platform:", "Time:") */
   label: {
     fontSize: typography.fontSize.body,
     lineHeight: typography.lineHeight.body,
-    color: colors.textSecondary,
-    fontWeight: 'bold' as const,
+    color: colors.textPrimary,
+    fontWeight: 600 as const,
     fontFamily: typography.fontFamily,
     margin: 0,
     display: 'inline',
   },
 
-  /** Primary CTA button - matches app tertiary button style */
+  /** Primary CTA button - Attio-style dark, prominent */
   button: {
     display: 'inline-block',
-    backgroundColor: colors.brandTertiary,
+    backgroundColor: colors.brandButton,
     color: '#ffffff',
     fontWeight: 500,
-    fontSize: '14px',
-    padding: '6px 12px',
-    borderRadius: '5px',
+    fontSize: '16px',
+    padding: '14px 28px',
+    borderRadius: '8px',
     textDecoration: 'none',
     textAlign: 'center' as const,
-    margin: '4px 0',
+    margin: '24px 0',
     fontFamily: typography.fontFamily,
   },
 
-  /** Link text style */
+  /** Link text style - Golden accent like Attio */
   link: {
-    color: colors.brandTertiary,
-    fontWeight: 'bold' as const,
-    textDecoration: 'none',
+    color: colors.linkColor,
+    fontWeight: 500 as const,
+    textDecoration: 'underline',
   },
 
-  /** Horizontal divider */
+  /** Horizontal divider - More subtle */
   divider: {
     borderTop: `1px solid ${colors.divider}`,
-    margin: `16px 0`,
+    margin: `32px 0`,
   },
 
-  /** Footer container (inside gray area below card) */
+  /** Footer container - Attio-style minimal */
   footer: {
     maxWidth: `${spacing.containerWidth}px`,
     margin: '0 auto',
-    padding: `32px ${spacing.gutter}px`,
-    textAlign: 'left' as const,
+    padding: `48px ${spacing.gutter}px`,
+    textAlign: 'center' as const,
   },
 
-  /** Footer text style */
+  /** Footer text style - Subtle and minimal */
   footerText: {
     fontSize: typography.fontSize.caption,
     lineHeight: typography.lineHeight.caption,
     color: colors.textMuted,
     fontFamily: typography.fontFamily,
-    margin: '0 0 10px 0',
+    margin: '0 0 8px 0',
   },
 
-  /** Code/OTP container */
+  /** Code/OTP container - Clean design */
   codeContainer: {
-    margin: '12px 0',
-    padding: '12px 16px',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '6px',
-    border: `1px solid ${colors.divider}`,
+    margin: '24px 0',
+    padding: '16px 20px',
+    backgroundColor: '#f9fafb',
+    borderRadius: '8px',
+    border: 'none',
     textAlign: 'center' as const,
   },
 
   /** Code/OTP text */
   code: {
-    fontSize: '24px',
-    fontWeight: 'bold' as const,
-    letterSpacing: '3px',
+    fontSize: '28px',
+    fontWeight: 600 as const,
+    letterSpacing: '4px',
     color: colors.textPrimary,
     fontFamily: typography.fontFamily,
     margin: 0,
@@ -178,18 +186,19 @@ export const baseStyles = {
     fontSize: typography.fontSize.caption,
     lineHeight: typography.lineHeight.caption,
     color: colors.textSecondary,
-    fontFamily: 'monospace',
+    fontFamily: "'SF Mono', 'Monaco', 'Menlo', monospace",
     whiteSpace: 'pre-wrap' as const,
     wordWrap: 'break-word' as const,
     margin: 0,
   },
 
-  /** Highlighted info box (e.g., "What you get with Pro") */
+  /** Highlighted info box - Attio-style subtle */
   infoBox: {
-    backgroundColor: colors.bgOuter,
-    padding: '16px 18px',
-    borderRadius: '6px',
-    margin: '16px 0',
+    backgroundColor: '#f9fafb',
+    padding: '20px 24px',
+    borderRadius: '8px',
+    margin: '24px 0',
+    border: 'none',
   },
 
   /** Info box title */
@@ -199,32 +208,32 @@ export const baseStyles = {
     fontWeight: 600,
     color: colors.textPrimary,
     fontFamily: typography.fontFamily,
-    margin: '0 0 8px 0',
+    margin: '0 0 12px 0',
   },
 
   /** Info box list content */
   infoBoxList: {
     fontSize: typography.fontSize.body,
-    lineHeight: '1.6',
+    lineHeight: '1.7',
     color: colors.textSecondary,
     fontFamily: typography.fontFamily,
     margin: 0,
   },
 
-  /** Section borders - decorative accent line */
+  /** Section borders - hidden for Attio-style */
   sectionsBorders: {
     width: '100%',
-    display: 'flex',
+    display: 'none',
   },
 
   sectionBorder: {
-    borderBottom: `1px solid ${colors.divider}`,
-    width: '249px',
+    borderBottom: 'none',
+    width: '0',
   },
 
   sectionCenter: {
-    borderBottom: `1px solid ${colors.brandTertiary}`,
-    width: '102px',
+    borderBottom: 'none',
+    width: '0',
   },
 
   /** Spacer row for vertical spacing in tables */
@@ -252,6 +261,39 @@ export const baseStyles = {
     lineHeight: typography.lineHeight.body,
     color: colors.textSecondary,
     fontFamily: typography.fontFamily,
+    margin: '12px 0',
+  },
+
+  /** Hero image container - Attio-style centered illustration */
+  hero: {
+    textAlign: 'center' as const,
+    margin: `0 auto ${spacing.heroMargin}px auto`,
+    padding: '0 20px',
+  },
+
+  /** Heading text - Larger for emphasis */
+  heading: {
+    fontSize: typography.fontSize.heading,
+    lineHeight: typography.lineHeight.heading,
+    fontWeight: 600,
+    color: colors.textPrimary,
+    fontFamily: typography.fontFamily,
+    margin: '0 0 16px 0',
+  },
+
+  /** Secondary button - Outlined style */
+  buttonSecondary: {
+    display: 'inline-block',
+    backgroundColor: 'transparent',
+    color: colors.textPrimary,
+    fontWeight: 500,
+    fontSize: '14px',
+    padding: '10px 20px',
+    borderRadius: '6px',
+    border: `1px solid ${colors.divider}`,
+    textDecoration: 'none',
+    textAlign: 'center' as const,
     margin: '8px 0',
+    fontFamily: typography.fontFamily,
   },
 }
